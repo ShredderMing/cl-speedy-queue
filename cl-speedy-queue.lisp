@@ -29,6 +29,7 @@
    :queue-count
    :queue-length
    :queue-peek
+   :queue-peek-back
    :queue-full-p
    :queue-empty-p
    :enqueue
@@ -117,6 +118,14 @@
   "Dereference QUEUE's exit pointer"
   (svref queue (%queue-out queue)))
 
+(define-speedy-function %queue-peek-back (queue)
+  (svref queue
+         (let ((in (%queue-in queue)))
+           (declare (fixnum in))
+           (if (%queue-empty-p queue)
+               in
+               (%previous-index in (length queue))))))
+
 (define-speedy-function %queue-zero-p (queue)
   "Checks whether QUEUE's theoretical length is zero"
   (= (the fixnum (%queue-in queue))
@@ -154,6 +163,12 @@
   (let ((new-index (1+ current-index)))                 ; Simply increment the index
     (declare (fixnum new-index))
     (if (= new-index queue-real-length) 2 new-index)))  ; Overflow to 2 if necessary
+
+(define-speedy-function %previous-index (current-index queue-real-length)
+  (declare (fixnum current-index queue-real-length))
+  (let ((new-index (1- current-index)))
+    (declare (fixnum new-index))
+    (if (= new-index 1) (1- queue-real-length) new-index)))
 
 (define-speedy-function %enqueue (object queue &aux (in (%queue-in queue)))
   (declare (fixnum in))
@@ -193,6 +208,13 @@
 (defun queue-peek (queue)
   "Returns the next item that would be dequeued without dequeueing it."
   (let ((peek (%queue-peek queue)))
+    (if (eq peek '#.queue-sentinel)
+        (values nil nil)
+        (values peek t))))
+
+(defun queue-peek-back (queue)
+  "Returns the last item."
+  (let ((peek (%queue-peek-back queue)))
     (if (eq peek '#.queue-sentinel)
         (values nil nil)
         (values peek t))))

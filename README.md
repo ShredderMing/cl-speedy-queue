@@ -29,7 +29,11 @@ written by [Adlai Chandrasekhar](http://github.com/adlai) for use in
 *[function]* `queue-peek queue`
 
   Returns the next item that would be dequeued without dequeueing it.
+  
+*[function]* `queue-peek-back queue`
 
+  Returns the last item in the queue.
+  
 *[function]* `queue-full-p queue`
 
   Returns NIL if more items can be enqueued.
